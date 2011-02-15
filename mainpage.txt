@@ -1,0 +1,11 @@
+/** @mainpage Project 4 Directory (according to mainpage.txt)
+ *
+ * @section Description
+ * <p>This program (mytar) utility can read and write the "ustar" format used by our Linux Machines.</p>
+ *  
+ * @section Markup
+ * Doxygen generates HTML 4.01 Transitional documents with Cascading Style
+ * Sheets (CSS), and you can include
+ * markup tags that are compatible with those
+ * standards.  This includes most of the common modern markups before HTML5.
+ */ 
