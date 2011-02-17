@@ -21,9 +21,6 @@
 
 #include <getopt.h>
 
-/* Flags set by --help and --version */
-static int help_flag, version_flag;
-
 /** The main thing.
  * @param argc the number of tokens on the input line.
  * @param argv an array of tokens.
@@ -31,6 +28,14 @@ static int help_flag, version_flag;
  */
 int main (int argc, char *argv[])
 {
+  static int c_flag = 0;
+  static int t_flag = 0;
+  static int x_flag = 0;
+  static int v_flag = 0;
+  static int S_flag = 0;
+  static int f_flag = 0;
+  static int help_flag = 0;
+  static int version_flag = 0;
   int c;
   
   while (1)
@@ -74,27 +79,27 @@ int main (int argc, char *argv[])
       break;
      
     case 'c':
-      printf("option -c\n");
+      c_flag = 1;
       break;
 
     case 't':
-      printf("option -t\n");
+      t_flag = 1;
       break;
    
     case 'x':
-      printf("option -x\n");
+      x_flag = 1;
       break;
 
     case 'v':
-      printf("option -v\n");
+      v_flag = 1;
       break;
       
     case 'S':
-      printf("option -S\n");
+      S_flag = 1;
       break;
     
     case 'f':
-      printf("option -f\n");
+      f_flag = 1;
       break;
     
     case '?':
@@ -106,12 +111,21 @@ int main (int argc, char *argv[])
     }
   }
   
-  /* Instead of reporting --help and --version as
-   * they are encountered, we report the final status
-   * resulting from them. */
+  /* Report the final status of the flags */
+  if (c_flag)
+    printf("c flag is set\n");
+  if (t_flag)
+    printf("t flag is set\n");
+  if (x_flag)
+    printf("x flag is set\n");
+  if (v_flag)
+    printf("v flag is set\n");
+  if (S_flag)
+    printf("S flag is set\n");
+  if (f_flag)
+    printf("f flag is set\n");
   if (help_flag)
     printf("help flag is set\n");
-
   if (version_flag)
     printf("version flag is set\n");
 
