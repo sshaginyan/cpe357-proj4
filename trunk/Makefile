@@ -3,7 +3,7 @@
 #  Simple makefile for Project 3
 #
 #  Last Modified: Sun Feb 6 10:24:13 PST 2011
-#  @author Luis Castillo
+#  @author Luis Castillo, Ricardo Tijero
 CC=gcc
 CFLAGS=-Wall -g -ansi -pedantic -D_XOPEN_SOURCE=500 -D_FORTIFY_SOURCE -m32
 LDFLAGS= -m32
