@@ -6,8 +6,8 @@
  * Program "describe the program here (without quotes)"
  *
  * Last Modified: Wed Feb 16 13:39:06 PST 2011</pre>
- * @author Luis Castillo
- * Copyright (C) 2011 Luis Castillo. All rights reserved.
+ * @author Luis Castillo, Ricardo Tijero
+ * Copyright (C) 2011 Luis Castillo, Ricardo Tijero. All rights reserved.
  */
 
 #include <sys/types.h>
