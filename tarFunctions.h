@@ -28,6 +28,7 @@
 #define DEVNUM_SIZE 8
 #define PREFIX_SIZE 155;
 
+/* Tar header structure */
 typedef struct header header;
 
 struct header{
@@ -37,7 +38,7 @@ struct header{
     char groupID[GID_SIZE];
     char fileSize[FILE_SIZE];
     char time[TIME_SIZE];
-    char checksum[CHCKSM_SIZE];
+    char checksum[CHKSM_SIZE];
     char fileType;
     char linkName[LNKNAME_SIZE];
     char ustar[USTAR_SIZE];
@@ -49,6 +50,21 @@ struct header{
     char prefix[PREFIX_SIZE];
 };
 
+/* Tree Directory structure */
+typedef struct treeDir treeDir;
+
+struct treeDir{
+    header *fileInfo;        
+    int isDir;
+    struct treeDir *next;
+    struct treeDir *parent;
+    struct treeDir *child;
+};
+
+/* Function prototypes */
+treeDir *newDir (header *aHeader);
+/*treeDir *makeTree (header *headers[]);  UNDER CONSTRUCTION*/
+/*void traverce (treeDir *parent);      NO PURPOSE YET*/
 header *newHeader (char *buf);
 header *nextHeader (int fd);
 int isNullBlock (char *block);
