@@ -26,7 +26,7 @@
 #define UNAME_SIZE 32
 #define GNAME_SIZE 32
 #define DEVNUM_SIZE 8
-#define PREFIX_SIZE 155;
+#define PREFIX_SIZE 155
 
 /* Tar header structure */
 typedef struct header header;
@@ -64,7 +64,7 @@ struct treeDir{
 /* Function prototypes */
 treeDir *newDir (header *aHeader);
 /*treeDir *makeTree (header *headers[]);  UNDER CONSTRUCTION*/
-/*void traverce (treeDir *parent);      NO PURPOSE YET*/
+/*void traverse (treeDir *parent);      NO PURPOSE YET*/
 header *newHeader (char *buf);
 header *nextHeader (int fd);
 int isNullBlock (char *block);

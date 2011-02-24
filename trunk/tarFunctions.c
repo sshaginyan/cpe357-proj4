@@ -129,7 +129,7 @@ treeDir *search (treeDir *parent, char *path)
     }
 }
 /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO PURPOSE YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
-void traverce (treeDir *parent)
+void traverse (treeDir *parent)
 {
     if (parent != NULL)
     {
