@@ -16,10 +16,10 @@ mytar:	mytar.o tarFunctions.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 mytar.o:	mytar.c tarFunctions.h
-	$(CC) $(CFLAGS) -c $^
+	$(CC) $(CFLAGS) -c $<
 
 tarFunctions.o: tarFunctions.c tarFunctions.h
-	$(CC) $(CFLAGS) -c $^
+	$(CC) $(CFLAGS) -c $<
 
 .PHONY:	Doxyfile docs
 
