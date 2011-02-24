@@ -60,7 +60,89 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "tar.h"
 #include "tarFunctions.h"
+
+/***************************************************************************************/
+/* Description: Creates a new treeDir structure and returns a pointer to it.           */
+/***************************************************************************************/
+treeDir *newDir (header *aHeader)
+{
+    treeDir *aDir;
+
+    aDir = malloc (sizeof (struct treeDir));
+    if (aDir == NULL)
+    {
+        perror("malloc");
+        return NULL;
+    }
+ 
+    aDir->fileInfo = aHeader;
+    aDir->next = NULL;
+    aDir->parent = NULL;
+    aDir->child = NULL;
+
+    if (aHeader->fileType == DIRTYPE)
+    	aDir->isDir = 1;
+    else
+        aDir->isDir = 0;
+
+    return aDir;
+}
+
+/***************************************************************************************/
+/* UNDER CONSTRUCTION */
+/* builds a tree */
+/***************************************************************************************/
+treeDir *makeTree (header *headers[])
+{
+    int i = 0;
+    treeDir *root = NULL;
+    treeDir *parent = NULL;
+    treeDir *child = NULL;
+
+    root = parent = newDir( headers[i++] );
+    while( headers[i] != NULL)
+    {
+        child = newDir( headers[i] );
+        if (parent->isDir)
+            child->parent = parent;
+        if (child->isDir)
+            parent = child;
+
+        i++;
+    }
+
+    return root;
+}
+/* UNDER CONSTRUCTION: note: TOKENIZE PATH*/
+treeDir *search (treeDir *parent, char *path)
+{
+    char parentPath[strlen (path)];
+    
+    strcpy (parentPath, path);
+    getParentPath (parentPath);
+
+    if (parent != NULL)
+    {
+        while
+    }
+}
+/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO PURPOSE YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
+void traverce (treeDir *parent)
+{
+    if (parent != NULL)
+    {
+        while(parent != NULL)
+        {
+            if (Parent->isDir)
+               traverce (parent->child);
+            
+            parent = parent->next;
+        }
+    }
+    return;
+}*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /***************************************************************************************/
 /* Brif: Creates new header structure and returns a pointer to it.                     */
@@ -76,7 +158,7 @@ header *newHeader(char *buf)
     tarHeader = malloc (sizeof (struct header));
     if (tarHeader == NULL)
     {
-        perror("malooc");
+        perror("malloc");
         return NULL;
     }
 
