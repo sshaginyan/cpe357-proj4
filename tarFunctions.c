@@ -64,7 +64,8 @@
 #include "tarFunctions.h"
 
 /***************************************************************************************/
-/* Description: Creates a new treeDir structure and returns a pointer to it.           */
+/* Description: Given a pointer to a header, creates a new treeDir structure and       */
+/*      returns a pointer to it.                                                       */
 /***************************************************************************************/
 treeDir *newDir (header *aHeader)
 {
@@ -81,6 +82,7 @@ treeDir *newDir (header *aHeader)
     aDir->next = NULL;
     aDir->parent = NULL;
     aDir->child = NULL;
+    aDir->level = getLevel((aDir->fileInfo)->fileName);
 
     if (aHeader->fileType == DIRTYPE)
     	aDir->isDir = 1;
@@ -91,8 +93,8 @@ treeDir *newDir (header *aHeader)
 }
 
 /***************************************************************************************/
-/* UNDER CONSTRUCTION */
-/* builds a tree */
+/* Description: Given an array of header pointers, it builds a directory tree and      */
+/*       returns a pointer to the root of the tree.                                    */
 /***************************************************************************************/
 treeDir *makeTree (header *headers[])
 {
@@ -100,35 +102,103 @@ treeDir *makeTree (header *headers[])
     treeDir *root = NULL;
     treeDir *parent = NULL;
     treeDir *child = NULL;
+    treeDir *current = NULL;
 
-    root = parent = newDir( headers[i++] );
-    while( headers[i] != NULL)
+    root = parent = newDir (headers[i++]);
+
+    for (; headers[i] != NULL; i++)         /* Links all treeDir structures together. */
     {
-        child = newDir( headers[i] );
-        if (parent->isDir)
-            child->parent = parent;
-        if (child->isDir)
-            parent = child;
+         child = newDir (headers[i]);
+         parent->next = child;
+         parent = child;
+    }
 
-        i++;
+    parent = current = root;
+    
+    while (current != NULL)
+    {
+        child = current->next;
+        if (parent->isDir)
+            parent->child = child;
+        while (child->level > parent->level)
+        {
+            if (child->level == (parent->level + 1))
+                child->parent = parent;
+
+            child = child->next;
+        }
+        parent->next = child;
+
+        parent = current = current->next;
     }
 
     return root;
 }
-/* UNDER CONSTRUCTION: note: TOKENIZE PATH*/
-treeDir *search (treeDir *parent, char *path)
+
+/***************************************************************************************/
+/* Description: Given a treeDir tree and the name of a path in the tree, finds the     */
+/*       the directory of the file that the path points to and returns a pointer to it.*/
+/***************************************************************************************/
+treeDir *getParent (treeDir *parent, char *path)
 {
-    char parentPath[strlen (path)];
+    int i = strlen (path);
+    char parentPath[i];
     
     strcpy (parentPath, path);
-    getParentPath (parentPath);
+    for (i -= 1; i > 0; i--)
+    {
+        if(parentPath[i] == '/')
+        {
+            parentPath[i] = '\0';
+            break;
+        }
+    }
 
+    return find (parent, parentPath);
+}
+
+/***************************************************************************************/
+/* Description: Given a path, gest the level down the tree where the path leads to.    */
+/***************************************************************************************/
+int getLevel (char *path)
+{
+    int i = strlen(path);
+    int count = 0;
+
+    for (i -= 2; i >= 0; i--)
+    {
+        if(path[i] == '/')
+            count++;
+    }
+
+    return count;
+}
+
+/***************************************************************************************/
+/* Description: Given a treeDir tree and the name of a path in the tree, finds a file  */
+/*      in the Directory tree and returns a pointer to it.                             */
+/***************************************************************************************/
+treeDir *find (treeDir *parent, char *path)
+{
+    treeDir *temp = NULL;
     if (parent != NULL)
     {
-        while
+        while (parent != NULL)
+        {
+            if (strcmp (parent->fileName, path) == 0)
+                return parent;
+
+            if (parent->isDir)
+                if ((temp = traverce (parent->child)) != NULL)
+                    return temp;
+
+            parent = parent->next;
+        }
     }
+    return NULL;
 }
 /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO PURPOSE YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
+ * Description: Traverses a directory tree. Could be use for printing or searching.    *
 void traverse (treeDir *parent)
 {
     if (parent != NULL)
@@ -173,7 +243,7 @@ header *newHeader(char *buf)
 }
 
 /***************************************************************************************/
-/* Description: gets a header from a tar file and places pointer to next the next      */
+/* Description: gets a header from a tar file and moves the pointer to the next        */
 /*     header in the file.                                                             */
 /***************************************************************************************/
 header *nextHeader (int fd)
@@ -221,7 +291,7 @@ int isNullBlock (char *block)
 }
 
 /***************************************************************************************/
-/* Description: changes a number represented in ASCII characters to intigers.          */
+/* Description: converts a number represented in ASCII characters to an intiger.       */
 /***************************************************************************************/
 int charToInt (char *arr, int leng)
 {
@@ -237,14 +307,15 @@ int charToInt (char *arr, int leng)
 }
 /*>>>>>>>>>>>>>>>>>>>>>>  NEEDS REVISION <<<<<<<<<<<<<<<<<<<<<<<<<<*/
 /***************************************************************************************/
-/* Description: Displays the names of the files in an array. (myTar option -t)         */
+/* Description: Given an array of headers and the number of headers in the array,      */
+/*      displays the names of the files in an array. (myTar option -t)                 */
 /***************************************************************************************/
 void printFiles (header *files[], int leng)
 {
     int i;
 
     for (i = 0; i < leng; i++)
-        printf("%s\n", files[i]->fileName); /* fileName NULL terminated? */
+        printf("%s\n", files[i]->fileName); 
 
     return;
 }
