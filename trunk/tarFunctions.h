@@ -54,7 +54,8 @@ struct header{
 typedef struct treeDir treeDir;
 
 struct treeDir{
-    header *fileInfo;        
+    header *fileInfo;
+    int level;        
     int isDir;
     struct treeDir *next;
     struct treeDir *parent;
@@ -63,7 +64,10 @@ struct treeDir{
 
 /* Function prototypes */
 treeDir *newDir (header *aHeader);
-/*treeDir *makeTree (header *headers[]);  UNDER CONSTRUCTION*/
+treeDir *makeTree (header *headers[]);
+treeDir *getParent (treeDir *parent, char *path);
+int getLevel (char *path);
+treeDir *find (treeDir *parent, char *path);
 /*void traverse (treeDir *parent);      NO PURPOSE YET*/
 header *newHeader (char *buf);
 header *nextHeader (int fd);
@@ -73,4 +77,4 @@ void printFiles (header *files[], int leng);
 void printHelp (void);
 void printVersion (void);
 
-#endif
+#endif                                      
