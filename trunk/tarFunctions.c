@@ -143,7 +143,7 @@ treeDir *makeTree (header *headers[])
 treeDir *getParent (treeDir *parent, char *path)
 {
     int i = strlen (path);
-    char parentPath[i + 1];
+    char parentPath[BUF_SIZE];
     
     strcpy (parentPath, path);
     for (i -= 1; i > 0; i--)
@@ -207,7 +207,7 @@ void createTar ()
     struct stat f_stat;
     int errchk;
 
-    errchk = fstat (fd,); 
+    /*errchk = fstat (fd,); */
     
 }
 
@@ -250,9 +250,68 @@ header *newHeader(char *buf)
 
     for (i = 0; i < BLOCK_SIZE; i++)
     {
-        *pos = buf[i];
-        pos++;
+        pos->fileName[i] = buf[i];
     }
+/*    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->mode[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->userID[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->groupID[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->fileSize[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->time[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->checksum[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->fileType[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->linkName[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->ustar[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->version[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->userName[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->groupName[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->devMajNum[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->devMinNum[i] = buf[i];
+    }
+    for (i = 0; i < NAME_SIZE; i++)
+    {
+        pos->prefix[i] = buf[i];
+    }*/
     return tarHeader;
 }
 
@@ -262,7 +321,7 @@ header *newHeader(char *buf)
 /***************************************************************************************/
 header *nextHeader (int fd)
 {
-    int n, fullFile;
+    int n, fullFile = 0;
     int count = 0;
     char buf[BLOCK_SIZE];
     char aHeader[BLOCK_SIZE];
@@ -318,6 +377,23 @@ int charToInt (char *arr, int leng)
     }
 
     return num;
+}
+
+/***************************************************************************************/
+/* Description: Reads headers in a tar and saves fileName and fileType in an array.    */
+/***************************************************************************************/
+int readTar(header *headerArray[], int arraySize, int fd)
+{
+  int count = 0;
+
+  while(1)
+  {
+    if((headerArray[count] = nextHeader(fd)) == NULL)
+      break;
+    else
+      count++;
+  }
+  return count;
 }
 
 /*>>>>>>>>>>>>>>>>>>>>>>  NEEDS REVISION <<<<<<<<<<<<<<<<<<<<<<<<<<*/
