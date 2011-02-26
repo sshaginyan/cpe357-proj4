@@ -60,6 +60,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 #include "tar.h"
 #include "tarFunctions.h"
 
@@ -142,7 +143,7 @@ treeDir *makeTree (header *headers[])
 treeDir *getParent (treeDir *parent, char *path)
 {
     int i = strlen (path);
-    char parentPath[i];
+    char parentPath[i + 1];
     
     strcpy (parentPath, path);
     for (i -= 1; i > 0; i--)
@@ -185,11 +186,11 @@ treeDir *find (treeDir *parent, char *path)
     {
         while (parent != NULL)
         {
-            if (strcmp (parent->fileName, path) == 0)
+            if (strcmp (parent->fileInfo->fileName, path) == 0)
                 return parent;
 
             if (parent->isDir)
-                if ((temp = traverce (parent->child)) != NULL)
+                if ((temp = find (parent->child, path)) != NULL)
                     return temp;
 
             parent = parent->next;
@@ -197,6 +198,19 @@ treeDir *find (treeDir *parent, char *path)
     }
     return NULL;
 }
+/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>UNDER CONSTRUCTION<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+/***************************************************************************************/
+/* Description: Given a file, creates a tar file.                                      */
+/***************************************************************************************/
+void createTar ()
+{
+    struct stat f_stat;
+    int errchk;
+
+    errchk = fstat (fd,); 
+    
+}
+
 /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO PURPOSE YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
  * Description: Traverses a directory tree. Could be use for printing or searching.    *
 void traverse (treeDir *parent)
@@ -305,6 +319,7 @@ int charToInt (char *arr, int leng)
 
     return num;
 }
+
 /*>>>>>>>>>>>>>>>>>>>>>>  NEEDS REVISION <<<<<<<<<<<<<<<<<<<<<<<<<<*/
 /***************************************************************************************/
 /* Description: Given an array of headers and the number of headers in the array,      */
