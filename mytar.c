@@ -18,6 +18,8 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include <getopt.h> 
 #include "tarFunctions.h"
@@ -33,6 +35,7 @@ static int version_flag = 0;
 
 void parser(char *);
 void parser2(int, char **);
+void readFile(void);
 
 /** The main thing.
  * @param argc the number of tokens on the input line.
@@ -74,7 +77,8 @@ int main (int argc, char *argv[])
     printf("At least one operation -c -t or -x is required\n");
     exit(EXIT_FAILURE);
   }
-
+  
+  readFile();
   return EXIT_SUCCESS;
 }
 
@@ -205,5 +209,24 @@ void parser2(int argc, char *argv[])
     }
   }
 }
+
+void readFile(void)
+{
+  int fd;
+  int num_chars;
+  char buf[512];
+  header *fileHeader;
+
+  fd = open("test.txt", O_RDONLY);
+  num_chars = read(fd, buf, 512);
+
+  fileHeader = newHeader(buf);
+
+  printf("contents of header :%s\n", fileHeader->prefix);
+
+}
+
+
+
 
 /* vim: set et ai sts=2 sw=2: */
