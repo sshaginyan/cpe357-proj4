@@ -56,11 +56,6 @@ int main (int argc, char *argv[])
     parser(argv[1]);
 
   /* Report the final status of the flags */
-/*  if (t_flag && !v_flag)
-    printf("call function to list without verbose\n");
-  if (t_flag && v_flag)
-    printf("call function to list with verbose\n");
-*/
   if (f_flag == 0 && help_flag == 0 && version_flag == 0)
   {
     printf("-f option is required\n");
@@ -213,20 +208,17 @@ void parser2(int argc, char *argv[])
 void readFile(void)
 {
   int fd;
-  int num_chars;
-  char buf[512];
-  header *fileHeader;
+  int num_files;
+  header *fileHeader[1000];
 
-  fd = open("test.txt", O_RDONLY);
-  num_chars = read(fd, buf, 512);
+  fd = open("357.tar", O_RDONLY);
+  
+  num_files = readTar(fileHeader, fd);
+  printFiles(fileHeader, num_files);
 
-  fileHeader = newHeader(buf);
 
-  printf("contents of header :%s\n", fileHeader->prefix);
+/*  printf("contents of header :%s\n", fileHeader->fileName);*/
 
 }
-
-
-
 
 /* vim: set et ai sts=2 sw=2: */
