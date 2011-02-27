@@ -252,66 +252,7 @@ header *newHeader(char *buf)
     {
         pos->fileName[i] = buf[i];
     }
-/*    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->mode[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->userID[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->groupID[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->fileSize[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->time[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->checksum[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->fileType[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->linkName[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->ustar[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->version[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->userName[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->groupName[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->devMajNum[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->devMinNum[i] = buf[i];
-    }
-    for (i = 0; i < NAME_SIZE; i++)
-    {
-        pos->prefix[i] = buf[i];
-    }*/
+    
     return tarHeader;
 }
 
@@ -382,7 +323,7 @@ int charToInt (char *arr, int leng)
 /***************************************************************************************/
 /* Description: Reads headers in a tar and saves fileName and fileType in an array.    */
 /***************************************************************************************/
-int readTar(header *headerArray[], int arraySize, int fd)
+int readTar(header *headerArray[], int fd)
 {
   int count = 0;
 
@@ -403,12 +344,12 @@ int readTar(header *headerArray[], int arraySize, int fd)
 /***************************************************************************************/
 void printFiles (header *files[], int leng)
 {
-    int i;
+  int i;
 
-    for (i = 0; i < leng; i++)
-        printf("%s\n", files[i]->fileName); 
+  for (i = 0; i < leng; i++)
+     printf("%s\n", files[i]->fileName);
 
-    return;
+  return;
 }
 
 /***************************************************************************************/

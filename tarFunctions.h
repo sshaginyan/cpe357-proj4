@@ -73,7 +73,7 @@ header *newHeader (char *buf);
 header *nextHeader (int fd);
 int isNullBlock (char *block);
 int charToInt (char *arr, int leng);
-int readTar (header *headerArray[], int arraySize, int fd);
+int readTar (header *headerArray[], int fd);
 void printFiles (header *files[], int leng);
 void printHelp (void);
 void printVersion (void);
