@@ -211,11 +211,11 @@ void readFile(void)
   int num_files;
   header *fileHeader[1000];
 
-  fd = open("357.tar", O_RDONLY);
+  fd = open("test.tar", O_RDONLY);
   
   num_files = readTar(fileHeader, fd);
   printFiles(fileHeader, num_files);
-
+  printf("num of files: %d\n", num_files);
 
 /*  printf("contents of header :%s\n", fileHeader->fileName);*/
 
