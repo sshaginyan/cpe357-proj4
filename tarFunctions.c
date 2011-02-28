@@ -59,9 +59,11 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <fcntl.h>
 #include <string.h>
 #include <math.h>
+#include <dirent.h>
 #include "tar.h"
 #include "tarFunctions.h"
 
@@ -230,6 +232,92 @@ void createTar ()
  }*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /***************************************************************************************/
+/* Description: writes files.*/
+/***************************************************************************************/
+void writeFile (int tar_fd, char *fileName)
+{
+    int fd, err;
+    char buf[BLOCK_SIZE];
+    char nuls[BLOCK_SIZE] = {0};
+    struct stat stat_t;
+    if(stat(fileName, &stat_t) == -1)
+    {
+        perror("In function: writeFile\nstat");
+        exit(EXIT_FAILURE);
+    }
+
+    if (S_ISREG(stat_t.st_mode))
+    {
+        /* WRITE HEADER HERE */
+
+        if ((fd = open(fileName, O_RDONLY)) == -1)
+        {
+            perror("In function: writeFile\nopen");
+            exit(EXIT_FAILURE);
+        }
+        while ((Rerr = read(fd, buf, BLOCK_SIZE)) > 0)
+        {
+            if (write(tar_fd, buf, Rerr) == -1)
+            {
+                perror("In function: writeFiel\nwrite");
+                exit(EXIT_FAILURE);
+            }
+            if (Rerr != BLOCK_SIZE)
+                if (write(tar_fd, nuls, Rerr) == -1)
+                {
+                    perror("In function: writeFiel\nwrite");
+                    exit(EXIT_FAILURE);
+                }
+        }
+        if (Rerr == -1)
+        {
+            perror("In function: writeFile\nread");
+            exit(EXIT_FAILURE);
+        }
+        close(fd);
+    }
+
+    else if (S_ISDIR(stat_t.st_mode))
+    {
+        /* WRITE HEADER HERE */
+    }
+    else if (S_ISDIR(stat_t.st_mode))
+    {
+        /* WRITE HEADER HERE */
+    }
+    
+    return;
+}
+
+/***************************************************************************************/
+/* Description: traverse a directory.*/
+/***************************************************************************************/
+void traverseDir (int tar_fd, char *path)
+{
+    DIR *dp;
+    struct dirent *dir;
+
+    dp = opendir (path);
+
+    if (dp == NULL) 
+        return;
+    
+    while ((dir = readdir (dp)))
+    {
+        if (strcmp (dir->d_name, ".") == 0 || strcmp (dir->d_name, "..") == 0)
+            continue;
+        
+        if (dir->d_type == DT_DIR)
+            traverseDir (tar_fd, dir->d_name);
+
+        writeFile (tar_fd, dir->d_name);
+    }
+
+    closedir (dp);
+    return;
+}
+
+/***************************************************************************************/
 /* Description: Given an array of 512 characters, it creates a header structure and    */
 /*    initializes every field in the structure. Returns a pointer to structure.        */
 /***************************************************************************************/
@@ -239,12 +327,12 @@ header *newHeader(char *buf)
   header *tarHeader;
   header *pos;
 
-  tarHeader = malloc (BLOCK_SIZE);
-  if (tarHeader == NULL)
-  {
-    perror("malloc");
-    return NULL;
-  }
+    tarHeader = malloc (BLOCK_SIZE);
+    if (tarHeader == NULL)
+    {
+        perror("malloc");
+        return NULL;
+    }
 
   pos = tarHeader;
 
@@ -261,23 +349,24 @@ header *newHeader(char *buf)
 /***************************************************************************************/
 header *nextHeader (int fd, int startOfFile)
 {
-  int n;
-  char buf[BLOCK_SIZE];
-
-  while((n = read(fd, buf, BLOCK_SIZE)) > 0)
-    if(!isNullBlock(buf))
-      break;
-
-  if (n == -1)
-  {
-    perror("In function: nextHeader\nread");
-    exit(EXIT_FAILURE);
-  }
-  if (n == 0)
-    return NULL;
-
-  /*    printf("\n im here\n\n");*/
-  return newHeader(buf);
+    int n;
+    char buf[BLOCK_SIZE];
+    
+    while((n = read(fd, buf, BLOCK_SIZE)) > 0)
+    {
+        if (!isNullBlock(buf))
+            break;
+    }
+    if (n == -1)
+    {
+        perror("In function: nextHeader\nread");
+        exit(EXIT_FAILURE);
+    }
+    if (n == 0)
+        return NULL;
+    
+    printf("\n im here\n\n");
+    return newHeader(buf);
 }
 
 /***************************************************************************************/
@@ -285,7 +374,19 @@ header *nextHeader (int fd, int startOfFile)
 /***************************************************************************************/
 void skipData (int fd, int skip)
 {
-  if (skip == 0)
+    char *buf = NULL;
+
+    if (skip == 0)
+        return;
+
+    skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
+
+    if(read(fd, buf, skip) == -1)
+    {
+        perror("In function: skipData\nread");
+        exit(EXIT_FAILURE);
+    }
+
     return;
 
   skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
@@ -336,19 +437,20 @@ int charToInt (char *arr, int leng)
 }
 
 /***************************************************************************************/
-/* Description: converts an octal number to decimal number.                            */
+/* Description: converts a number represented in ASCII characters to an intiger.       */
 /***************************************************************************************/
-int Oct2Dec(int oct)
+int Oct2Dec (int oct)
 {
-  int n, r, s=0, i;
-  n = oct;
-  for(i = 0; n != 0; i++)
-  {
-    r = n % 10;
-    s += r * pow(8, i);
-    n = n / 10;
-  }
-  return s;
+    int n, r, i;
+    int s = 0;
+    n = oct;
+    for(i = 0; n != 0; i++)
+    {
+        r = n % 10;
+        s += r * pow(8, i);
+        n = n / 10;
+    }
+    return s;
 }
 
 /***************************************************************************************/
