@@ -70,12 +70,14 @@ int getLevel (char *path);
 treeDir *find (treeDir *parent, char *path);
 /*void traverse (treeDir *parent);      NO PURPOSE YET*/
 header *newHeader (char *buf);
-header *nextHeader (int fd);
+header * nextHeader (int fd, int startOfFile);
 int isNullBlock (char *block);
 int charToInt (char *arr, int leng);
 int readTar (header *headerArray[], int fd);
 void printFiles (header *files[], int leng);
+void printVerbose (header *files[], int leng);
 void printHelp (void);
 void printVersion (void);
+void freeMem (void **arr); /* DON'T KNOW IF ITS GOING TO WORK WITH AnyType*/
 
 #endif                                      
