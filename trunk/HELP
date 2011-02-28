@@ -1,1 +1,20 @@
-This is the help page for myTar.c
+This is the help page for myTar
+
+Usage: mytar [ctxvS]f tarfile [path[...]]
+
+Examples:
+  mytar -cf tarfile.tar one two   #Create tarfile.tar from files one and two.
+  mytar -tf tarfile.tar           #Lists the files in tarfile.tar.
+
+Operations:
+(only one of the following options can be specified)
+
+  -c    create a new archive
+  -t    list the contents of an archive 
+  -x    extract files from an archive
+
+Options:
+(the option -f is required)
+
+  -f    use archive file
+  -v    verbosely list files processed

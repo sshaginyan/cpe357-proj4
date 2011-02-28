@@ -11,6 +11,7 @@
 
 #define BUF_SIZE 100
 #define BLOCK_SIZE 512
+#define MODE_S 10
 
 /* Header components' sizes */
 #define NAME_SIZE 100
@@ -68,12 +69,16 @@ treeDir *makeTree (header *headers[]);
 treeDir *getParent (treeDir *parent, char *path);
 int getLevel (char *path);
 treeDir *find (treeDir *parent, char *path);
+void createTar(void);
+void writeFile(int, char*);
+void traverseDir(int, char*);
 /*void traverse (treeDir *parent);      NO PURPOSE YET*/
 header *newHeader (char *buf);
 header * nextHeader (int fd, int startOfFile);
 int isNullBlock (char *block);
 int charToInt (char *arr, int leng);
 int Oct2Dec(int oct);
+void Oct2Bin(char *, char *);
 int readTar (header *headerArray[], int fd);
 void printFiles (header *files[], int leng);
 void printVerbose (header *files[], int leng);

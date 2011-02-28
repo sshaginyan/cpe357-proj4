@@ -63,6 +63,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <dirent.h>
 #include "tar.h"
 #include "tarFunctions.h"
@@ -207,10 +208,11 @@ treeDir *find (treeDir *parent, char *path)
 /***************************************************************************************/
 void createTar ()
 {
+  /*
   struct stat f_stat;
   int errchk;
 
-  /*errchk = fstat (fd,); */
+  errchk = fstat (fd,); */
 
 }
 
@@ -236,7 +238,7 @@ void createTar ()
 /***************************************************************************************/
 void writeFile (int tar_fd, char *fileName)
 {
-    int fd, err;
+    int fd, Rerr;
     char buf[BLOCK_SIZE];
     char nuls[BLOCK_SIZE] = {0};
     struct stat stat_t;
@@ -307,7 +309,7 @@ void traverseDir (int tar_fd, char *path)
         if (strcmp (dir->d_name, ".") == 0 || strcmp (dir->d_name, "..") == 0)
             continue;
         
-        if (dir->d_type == DT_DIR)
+    /*    if (dir->d_type == DT_DIR) */
             traverseDir (tar_fd, dir->d_name);
 
         writeFile (tar_fd, dir->d_name);
@@ -327,12 +329,12 @@ header *newHeader(char *buf)
   header *tarHeader;
   header *pos;
 
-    tarHeader = malloc (BLOCK_SIZE);
-    if (tarHeader == NULL)
-    {
-        perror("malloc");
-        return NULL;
-    }
+  tarHeader = malloc (BLOCK_SIZE);
+  if (tarHeader == NULL)
+  {
+    perror("malloc");
+    return NULL;
+  }
 
   pos = tarHeader;
 
@@ -349,24 +351,23 @@ header *newHeader(char *buf)
 /***************************************************************************************/
 header *nextHeader (int fd, int startOfFile)
 {
-    int n;
-    char buf[BLOCK_SIZE];
-    
-    while((n = read(fd, buf, BLOCK_SIZE)) > 0)
-    {
-        if (!isNullBlock(buf))
-            break;
-    }
-    if (n == -1)
-    {
-        perror("In function: nextHeader\nread");
-        exit(EXIT_FAILURE);
-    }
-    if (n == 0)
-        return NULL;
-    
-    printf("\n im here\n\n");
-    return newHeader(buf);
+  int n;
+  char buf[BLOCK_SIZE];
+
+  while((n = read(fd, buf, BLOCK_SIZE)) > 0)
+    if(!isNullBlock(buf))
+      break;
+
+  if (n == -1)
+  {
+    perror("In function: nextHeader\nread");
+    exit(EXIT_FAILURE);
+  }
+  if (n == 0)
+    return NULL;
+
+  /*    printf("\n im here\n\n");*/
+  return newHeader(buf);
 }
 
 /***************************************************************************************/
@@ -374,19 +375,7 @@ header *nextHeader (int fd, int startOfFile)
 /***************************************************************************************/
 void skipData (int fd, int skip)
 {
-    char *buf = NULL;
-
-    if (skip == 0)
-        return;
-
-    skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
-
-    if(read(fd, buf, skip) == -1)
-    {
-        perror("In function: skipData\nread");
-        exit(EXIT_FAILURE);
-    }
-
+  if (skip == 0)
     return;
 
   skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
@@ -437,20 +426,167 @@ int charToInt (char *arr, int leng)
 }
 
 /***************************************************************************************/
-/* Description: converts a number represented in ASCII characters to an intiger.       */
+/* Description: converts an octal number to decimal number.                            */
 /***************************************************************************************/
-int Oct2Dec (int oct)
+int Oct2Dec(int oct)
 {
-    int n, r, i;
-    int s = 0;
-    n = oct;
-    for(i = 0; n != 0; i++)
-    {
-        r = n % 10;
-        s += r * pow(8, i);
-        n = n / 10;
-    }
-    return s;
+  int n, r, i;
+  int s = 0;
+
+  n = oct;
+
+  for(i = 0; n != 0; i++)
+  {
+    r = n % 10;
+    s += r * pow(8, i);
+    n = n / 10;
+  }
+  return s;
+}
+
+/***************************************************************************************/
+/* Description: converts an octal string to binary string.                             */
+/***************************************************************************************/
+void Oct2Bin(char *oct, char *bin)
+{
+  bin[0]='-';
+  switch(oct[4])
+  {
+    case '0':
+      bin[1]='-';
+      bin[2]='-';
+      bin[3]='-';
+      break;
+    case '1':
+      bin[1]='-';
+      bin[2]='-';
+      bin[3]='x';
+      break;
+    case '2':
+      bin[1]='-';
+      bin[2]='w';
+      bin[3]='-';
+      break;
+    case '3':
+      bin[1]='-';
+      bin[2]='w';
+      bin[3]='x';
+      break;
+    case '4':
+      bin[1]='r';
+      bin[2]='-';
+      bin[3]='-';
+      break;
+    case '5':
+      bin[1]='r';
+      bin[2]='-';
+      bin[3]='x';
+      break;
+    case '6':
+      bin[1]='r';
+      bin[2]='w';
+      bin[3]='-';
+      break;
+    case '7':
+      bin[1]='r';
+      bin[2]='w';
+      bin[3]='x';
+      break;
+    default:
+      abort();
+  }
+  switch(oct[5])
+  {
+    case '0':
+      bin[4]='-';
+      bin[5]='-';
+      bin[6]='-';
+      break;
+    case '1':
+      bin[4]='-';
+      bin[5]='-';
+      bin[6]='x';
+      break;
+    case '2':
+      bin[4]='-';
+      bin[5]='w';
+      bin[6]='-';
+      break;
+    case '3':
+      bin[4]='-';
+      bin[5]='w';
+      bin[6]='x';
+      break;
+    case '4':
+      bin[4]='r';
+      bin[5]='-';
+      bin[6]='-';
+      break;
+    case '5':
+      bin[4]='r';
+      bin[5]='-';
+      bin[6]='x';
+      break;
+    case '6':
+      bin[4]='r';
+      bin[5]='w';
+      bin[6]='-';
+      break;
+    case '7':
+      bin[4]='r';
+      bin[5]='w';
+      bin[6]='x';
+      break;
+    default:
+      abort();
+  }
+  switch(oct[6])
+  {
+    case '0':
+      bin[7]='-';
+      bin[8]='-';
+      bin[9]='-';
+      break;
+    case '1':
+      bin[7]='-';
+      bin[8]='-';
+      bin[9]='x';
+      break;
+    case '2':
+      bin[7]='-';
+      bin[8]='w';
+      bin[9]='-';
+      break;
+    case '3':
+      bin[7]='-';
+      bin[8]='w';
+      bin[9]='x';
+      break;
+    case '4':
+      bin[7]='r';
+      bin[8]='-';
+      bin[9]='-';
+      break;
+    case '5':
+      bin[7]='r';
+      bin[8]='-';
+      bin[9]='x';
+      break;
+    case '6':
+      bin[7]='r';
+      bin[8]='w';
+      bin[9]='-';
+      break;
+    case '7':
+      bin[7]='r';
+      bin[8]='w';
+      bin[9]='x';
+      break;
+    default:
+      abort();
+  }
+
+  return;
 }
 
 /***************************************************************************************/
@@ -491,13 +627,16 @@ void printFiles (header *files[], int leng)
 void printVerbose (header *files[], int leng)
 {
   int i;
+  char *mode;
+  mode = malloc(MODE_S);
+
   for (i = 0; i < leng; i++)
   {
-    /*        printf("%s ", stat permisions); */
+    Oct2Bin(files[i]->mode, mode);
+    printf("%s ", mode);
     printf("%s/", files[i]->userName);
     printf("%s ", files[i]->groupName);
     printf("%8d ", Oct2Dec(charToInt(files[i]->fileSize, FILE_SIZE)));
-    /*        printf("%s ", stat date); */
     printf("%s ", files[i]->time);
     printf("%s\n", files[i]->fileName);
   }
