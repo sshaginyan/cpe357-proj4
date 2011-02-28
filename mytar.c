@@ -35,7 +35,7 @@ static int version_flag = 0;
 
 void parser(char *);
 void parser2(int, char **);
-void readFile(void);
+void readFile(char *);
 
 /** The main thing.
  * @param argc the number of tokens on the input line.
@@ -56,29 +56,49 @@ int main (int argc, char *argv[])
     parser(argv[1]);
 
   /* Report the final status of the flags */
-  if (f_flag == 0 && help_flag == 0 && version_flag == 0)
+  if (!f_flag && !help_flag && !version_flag)
   {
     printf("-f option is required\n");
     exit(EXIT_FAILURE);
   }
-  else if (help_flag == 1)
+  else if (help_flag)
     printHelp();
-  else if (version_flag == 1)
+  else if (version_flag)
     printVersion();
 
-  if ((c_flag == 0) && (t_flag == 0) && (x_flag == 0) &&
-      (help_flag == 0) && (version_flag == 0))
+  if (!c_flag && !t_flag && !x_flag && !help_flag && !version_flag)
   {
-    printf("At least one operation -c -t or -x is required\n");
+    printf("One operation -c -t or -x is required\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if ((c_flag && t_flag) || (c_flag && x_flag) || (x_flag && t_flag))
+  {
+    printf("Only one operation -c -t or -x can be specified\n");
     exit(EXIT_FAILURE);
   }
   
-  readFile();
+  if (t_flag && f_flag)
+  {
+    readFile(argv[2]);
+  }
+  
+  if (c_flag)
+  {
+    printf("Implemented but not properly functioning.\n");
+    exit(EXIT_FAILURE);
+  }
+  if (x_flag)
+  {
+    printf("Not implemented.\n");
+    exit(EXIT_FAILURE);
+  }
+  
   return EXIT_SUCCESS;
 }
 
 /** Function parses command line options
- * that do not begin with 'n'
+ * that do not begin with '-'
  * @param arg pointer to command line argument
  */
 void parser(char *arg)
@@ -127,6 +147,11 @@ void parser(char *arg)
   }
 }
 
+/** Function parses command line options
+ * that begin with '-'
+ * @param argc the number of tokens on the input line.
+ * @param argv an array of tokens.
+ */
 void parser2(int argc, char *argv[])
 {
   int c;
@@ -165,12 +190,6 @@ void parser2(int argc, char *argv[])
         /* If this option set a flag, do nothing else now. */
         if (long_options[option_index].flag != 0)
           break;
-        /*      printf ("option %s", long_options[option_index].name);
-                if (optarg)
-                printf (" with arg %s", optarg);
-                printf ("\n");
-                break;*/
-
       case 'c':
         c_flag = 1;
         break;
@@ -205,20 +224,26 @@ void parser2(int argc, char *argv[])
   }
 }
 
-void readFile(void)
+void readFile(char *file)
 {
   int fd;
   int num_files;
   header *fileHeader[1000];
 
-  fd = open("test.tar", O_RDONLY);
+  if((fd = open(file, O_RDONLY)) == -1)
+  {
+    perror("open");
+    exit(EXIT_FAILURE);
+  }
   
   num_files = readTar(fileHeader, fd);
-  printVerbose(fileHeader, num_files);
-  printf("num of files: %d\n", num_files);
+  
+  if(v_flag)
+    printVerbose(fileHeader, num_files);
+  else
+    printFiles(fileHeader, num_files);
 
-/*  printf("contents of header :%s\n", fileHeader->fileName);*/
-
+  return;
 }
 
 /* vim: set et ai sts=2 sw=2: */

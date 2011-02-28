@@ -1,0 +1,11 @@
+Name: Luis Castillo and Ricardo Tijero
+LOGIN: lacastil and rtijero
+Section: CPE 357-06 MWF 4:10-5:00 PM
+
+Project 4 - mytar
+
+Credits: man pages. 
+
+To compile enter "make all" or "make mytar" or "make". To run follow the usage shown in the help file that can be viewed by entering "mytar --help".
+Did not complete writing the archive and did not implement the extract operation and strict option. Only list and list verbose of an archive were completed. 
+When listing with verbose, the date and time are not properly printed, it only prints the octal value obtained from the header block.
