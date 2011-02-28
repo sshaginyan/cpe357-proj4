@@ -71,27 +71,27 @@
 /***************************************************************************************/
 treeDir *newDir (header *aHeader)
 {
-    treeDir *aDir;
+  treeDir *aDir;
 
-    aDir = malloc (sizeof (struct treeDir));
-    if (aDir == NULL)
-    {
-        perror("malloc");
-        return NULL;
-    }
+  aDir = malloc (sizeof (struct treeDir));
+  if (aDir == NULL)
+  {
+    perror("malloc");
+    return NULL;
+  }
 
-    aDir->fileInfo = aHeader;
-    aDir->next = NULL;
-    aDir->parent = NULL;
-    aDir->child = NULL;
-    aDir->level = getLevel((aDir->fileInfo)->fileName);
+  aDir->fileInfo = aHeader;
+  aDir->next = NULL;
+  aDir->parent = NULL;
+  aDir->child = NULL;
+  aDir->level = getLevel((aDir->fileInfo)->fileName);
 
-    if (aHeader->fileType == DIRTYPE)
-        aDir->isDir = 1;
-    else
-        aDir->isDir = 0;
+  if (aHeader->fileType == DIRTYPE)
+    aDir->isDir = 1;
+  else
+    aDir->isDir = 0;
 
-    return aDir;
+  return aDir;
 }
 
 /***************************************************************************************/
@@ -100,41 +100,41 @@ treeDir *newDir (header *aHeader)
 /***************************************************************************************/
 treeDir *makeTree (header *headers[])
 {
-    int i = 0;
-    treeDir *root = NULL;
-    treeDir *parent = NULL;
-    treeDir *child = NULL;
-    treeDir *current = NULL;
+  int i = 0;
+  treeDir *root = NULL;
+  treeDir *parent = NULL;
+  treeDir *child = NULL;
+  treeDir *current = NULL;
 
-    root = parent = newDir (headers[i++]);
+  root = parent = newDir (headers[i++]);
 
-    for (; headers[i] != NULL; i++)         /* Links all treeDir structures together. */
+  for (; headers[i] != NULL; i++)         /* Links all treeDir structures together. */
+  {
+    child = newDir (headers[i]);
+    parent->next = child;
+    parent = child;
+  }
+
+  parent = current = root;
+
+  while (current != NULL)
+  {
+    child = current->next;
+    if (parent->isDir)
+      parent->child = child;
+    while (child->level > parent->level)
     {
-        child = newDir (headers[i]);
-        parent->next = child;
-        parent = child;
+      if (child->level == (parent->level + 1))
+        child->parent = parent;
+
+      child = child->next;
     }
+    parent->next = child;
 
-    parent = current = root;
+    parent = current = current->next;
+  }
 
-    while (current != NULL)
-    {
-        child = current->next;
-        if (parent->isDir)
-            parent->child = child;
-        while (child->level > parent->level)
-        {
-            if (child->level == (parent->level + 1))
-                child->parent = parent;
-
-            child = child->next;
-        }
-        parent->next = child;
-
-        parent = current = current->next;
-    }
-
-    return root;
+  return root;
 }
 
 /***************************************************************************************/
@@ -143,20 +143,20 @@ treeDir *makeTree (header *headers[])
 /***************************************************************************************/
 treeDir *getParent (treeDir *parent, char *path)
 {
-    int i = strlen (path);
-    char parentPath[BUF_SIZE];
+  int i = strlen (path);
+  char parentPath[BUF_SIZE];
 
-    strcpy (parentPath, path);
-    for (i -= 1; i > 0; i--)
+  strcpy (parentPath, path);
+  for (i -= 1; i > 0; i--)
+  {
+    if(parentPath[i] == '/')
     {
-        if(parentPath[i] == '/')
-        {
-            parentPath[i] = '\0';
-            break;
-        }
+      parentPath[i] = '\0';
+      break;
     }
+  }
 
-    return find (parent, parentPath);
+  return find (parent, parentPath);
 }
 
 /***************************************************************************************/
@@ -164,16 +164,16 @@ treeDir *getParent (treeDir *parent, char *path)
 /***************************************************************************************/
 int getLevel (char *path)
 {
-    int i = strlen(path);
-    int count = 0;
+  int i = strlen(path);
+  int count = 0;
 
-    for (i -= 2; i >= 0; i--)
-    {
-        if(path[i] == '/')
-            count++;
-    }
+  for (i -= 2; i >= 0; i--)
+  {
+    if(path[i] == '/')
+      count++;
+  }
 
-    return count;
+  return count;
 }
 
 /***************************************************************************************/
@@ -182,22 +182,22 @@ int getLevel (char *path)
 /***************************************************************************************/
 treeDir *find (treeDir *parent, char *path)
 {
-    treeDir *temp = NULL;
-    if (parent != NULL)
+  treeDir *temp = NULL;
+  if (parent != NULL)
+  {
+    while (parent != NULL)
     {
-        while (parent != NULL)
-        {
-            if (strcmp (parent->fileInfo->fileName, path) == 0)
-                return parent;
+      if (strcmp (parent->fileInfo->fileName, path) == 0)
+        return parent;
 
-            if (parent->isDir)
-                if ((temp = find (parent->child, path)) != NULL)
-                    return temp;
+      if (parent->isDir)
+        if ((temp = find (parent->child, path)) != NULL)
+          return temp;
 
-parent = parent->next;
-        }
+      parent = parent->next;
     }
-    return NULL;
+  }
+  return NULL;
 }
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>UNDER CONSTRUCTION<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 /***************************************************************************************/
@@ -205,10 +205,10 @@ parent = parent->next;
 /***************************************************************************************/
 void createTar ()
 {
-    struct stat f_stat;
-    int errchk;
+  struct stat f_stat;
+  int errchk;
 
-    /*errchk = fstat (fd,); */
+  /*errchk = fstat (fd,); */
 
 }
 
@@ -235,24 +235,24 @@ void createTar ()
 /***************************************************************************************/
 header *newHeader(char *buf)
 {
-    int i;
-    header *tarHeader;
-    header *pos;
+  int i;
+  header *tarHeader;
+  header *pos;
 
-    tarHeader = malloc (sizeof (struct header));
-    if (tarHeader == NULL)
-    {
-        perror("malloc");
-        return NULL;
-    }
+  tarHeader = malloc (BLOCK_SIZE);
+  if (tarHeader == NULL)
+  {
+    perror("malloc");
+    return NULL;
+  }
 
-    pos = tarHeader;
+  pos = tarHeader;
 
-    for (i = 0; i < BLOCK_SIZE; i++)
-    {
-        pos->fileName[i] = buf[i];
-    }
-    return tarHeader;
+  for (i = 0; i < BLOCK_SIZE; i++)
+  {
+    pos->fileName[i] = buf[i];
+  }
+  return tarHeader;
 }
 
 /***************************************************************************************/
@@ -261,20 +261,23 @@ header *newHeader(char *buf)
 /***************************************************************************************/
 header *nextHeader (int fd, int startOfFile)
 {
-    int n;
-    char buf[BLOCK_SIZE];
-    
-    n = read(fd, buf, BLOCK_SIZE); 
-    if (n == -1)
-    {
-        perror("In function: nextHeader\nread");
-        exit(EXIT_FAILURE);
-    }
-    if (n == 0)
-        return NULL;
-    
-/*    printf("\n im here\n\n");*/
-    return newHeader(buf);
+  int n;
+  char buf[BLOCK_SIZE];
+
+  while((n = read(fd, buf, BLOCK_SIZE)) > 0)
+    if(!isNullBlock(buf))
+      break;
+
+  if (n == -1)
+  {
+    perror("In function: nextHeader\nread");
+    exit(EXIT_FAILURE);
+  }
+  if (n == 0)
+    return NULL;
+
+  /*    printf("\n im here\n\n");*/
+  return newHeader(buf);
 }
 
 /***************************************************************************************/
@@ -282,22 +285,18 @@ header *nextHeader (int fd, int startOfFile)
 /***************************************************************************************/
 void skipData (int fd, int skip)
 {
-    char *buf;
-
-    if (skip == 0)
-        return;
-
-    skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
-
-    printf("size of skip %d\n", skip);
-
-    if(lseek(fd, skip, SEEK_CUR) == -1)
-    {
-        perror("In function: skipData\nread");
-        exit(EXIT_FAILURE);
-    }
-
+  if (skip == 0)
     return;
+
+  skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
+
+  if(lseek(fd, skip, SEEK_CUR) == -1)
+  {
+    perror("In function: skipData\nread");
+    exit(EXIT_FAILURE);
+  }
+
+  return;
 }
 
 /***************************************************************************************/
@@ -305,19 +304,19 @@ void skipData (int fd, int skip)
 /***************************************************************************************/
 int isNullBlock (char *block)
 {
-    int i;
-    int count = 0;
+  int i;
+  int count = 0;
 
-    for (i = 0; i < BLOCK_SIZE; i++)
-    {
-        if (block[i] == '\0')
-            count++;
-    }
+  for (i = 0; i < BLOCK_SIZE; i++)
+  {
+    if (block[i] == '\0')
+      count++;
+  }
 
-    if (count == BLOCK_SIZE)
-        return 1;
-    else
-        return 0;
+  if (count == BLOCK_SIZE)
+    return 1;
+  else
+    return 0;
 }
 
 /***************************************************************************************/
@@ -325,31 +324,31 @@ int isNullBlock (char *block)
 /***************************************************************************************/
 int charToInt (char *arr, int leng)
 {
-    int num = 0;
-    int i;
-    
-    for (i = 0; i < leng && arr[i] != '\0'; i++)
-    {
-        num = ((num * 10) + (arr[i] - '0'));
-    }
+  int num = 0;
+  int i;
 
-    return num;
+  for (i = 0; i < leng && arr[i] != '\0'; i++)
+  {
+    num = ((num * 10) + (arr[i] - '0'));
+  }
+
+  return num;
 }
 
 /***************************************************************************************/
-/* Description: converts a number represented in ASCII characters to an intiger.       */
+/* Description: converts an octal number to decimal number.                            */
 /***************************************************************************************/
 int Oct2Dec(int oct)
 {
-    int n, r, s=0, i;
-    n = oct;
-    for(i = 0; n != 0; i++)
-    {
-        r = n % 10;
-        s += r * pow(8, i);
-        n = n / 10;
-    }
-    return s;
+  int n, r, s=0, i;
+  n = oct;
+  for(i = 0; n != 0; i++)
+  {
+    r = n % 10;
+    s += r * pow(8, i);
+    n = n / 10;
+  }
+  return s;
 }
 
 /***************************************************************************************/
@@ -357,17 +356,15 @@ int Oct2Dec(int oct)
 /***************************************************************************************/
 int readTar(header *headerArray[], int fd)
 {
-    int count = 0;
+  int count = 0;
 
-    printf("will read tar, count %d\n", count);
-    while((headerArray[count] = nextHeader(fd, count)) != NULL)
-    {
-        skipData(fd, Oct2Dec(charToInt(headerArray[count]->fileSize, FILE_SIZE)));
-        count++;
-    }
+  while((headerArray[count] = nextHeader(fd, count)) != NULL)
+  {
+    skipData(fd, Oct2Dec(charToInt(headerArray[count]->fileSize, FILE_SIZE)));
+    count++;
+  }
 
-    printf("read tar count: %d \n", count);
-    return count;
+  return count;
 }
 
 /*>>>>>>>>>>>>>>>>>>>>>>  NEEDS REVISION <<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -377,12 +374,12 @@ int readTar(header *headerArray[], int fd)
 /***************************************************************************************/
 void printFiles (header *files[], int leng)
 {
-    int i;
+  int i;
 
-    for (i = 0; i < leng; i++)
-        printf("%s\n", files[i]->fileName);
+  for (i = 0; i < leng; i++)
+    printf("%s\n", files[i]->fileName);
 
-    return;
+  return;
 }
 
 /***************************************************************************************/
@@ -391,19 +388,19 @@ void printFiles (header *files[], int leng)
 /***************************************************************************************/
 void printVerbose (header *files[], int leng)
 {
-    int i;
-    for (i = 0; i < leng; i++)
-    {
-/*        printf("%s ", stat permisions); */
-        printf("%s/", files[i]->userName);
-        printf("%s ", files[i]->groupName);
-        printf("%8s ", files[i]->fileSize);
-/*        printf("%s ", stat date); */
-        printf("%s ", files[i]->time);
-        printf("%s\n", files[i]->fileName);
-    }
+  int i;
+  for (i = 0; i < leng; i++)
+  {
+    /*        printf("%s ", stat permisions); */
+    printf("%s/", files[i]->userName);
+    printf("%s ", files[i]->groupName);
+    printf("%8d ", Oct2Dec(charToInt(files[i]->fileSize, FILE_SIZE)));
+    /*        printf("%s ", stat date); */
+    printf("%s ", files[i]->time);
+    printf("%s\n", files[i]->fileName);
+  }
 
-    return;
+  return;
 }
 
 /***************************************************************************************/
@@ -411,26 +408,26 @@ void printVerbose (header *files[], int leng)
 /***************************************************************************************/
 void printHelp ()
 {
-    int fd;
-    char buf[BUF_SIZE];
-    int i;
-    int numChars;
+  int fd;
+  char buf[BUF_SIZE];
+  int i;
+  int numChars;
 
-    fd = open("HELP", O_RDONLY);
-    if(fd == -1)
-    {
-        perror("Error opening HELP file");
-        return;
-    }
-
-    while((numChars = read(fd, buf, BUF_SIZE)) > 0)
-    {
-        for( i = 0; i < numChars; i++)
-            printf("%c", buf[i]);
-    }
-
-    close(fd);
+  fd = open("HELP", O_RDONLY);
+  if(fd == -1)
+  {
+    perror("Error opening HELP file");
     return;
+  }
+
+  while((numChars = read(fd, buf, BUF_SIZE)) > 0)
+  {
+    for( i = 0; i < numChars; i++)
+      printf("%c", buf[i]);
+  }
+
+  close(fd);
+  return;
 }
 
 /***************************************************************************************/
@@ -438,34 +435,34 @@ void printHelp ()
 /***************************************************************************************/
 void printVersion ()
 {
-    int fd;
-    char buf[BUF_SIZE];
-    int i;
-    int numChars;
+  int fd;
+  char buf[BUF_SIZE];
+  int i;
+  int numChars;
 
-    fd = open("VERSION", O_RDONLY);
-    if(fd == -1)
-    {
-        perror("Error opening VERSION file");
-        return;
-    }
-
-    while((numChars = read(fd, buf, BUF_SIZE)) > 0)
-    {
-        for( i = 0; i < numChars; i++)
-            printf("%c", buf[i]);
-    }
-
-    close(fd);
+  fd = open("VERSION", O_RDONLY);
+  if(fd == -1)
+  {
+    perror("Error opening VERSION file");
     return;
+  }
+
+  while((numChars = read(fd, buf, BUF_SIZE)) > 0)
+  {
+    for( i = 0; i < numChars; i++)
+      printf("%c", buf[i]);
+  }
+
+  close(fd);
+  return;
 }
 /***************************************************************************************/
 /* Description: Free allocated memory.                                                 */
 /***************************************************************************************/
 void freeMem (void **arr)
 {
-    int i;
-    for (i = 0; arr[i] != NULL; i++)
-        free (arr[i]);
-    return;
+  int i;
+  for (i = 0; arr[i] != NULL; i++)
+    free (arr[i]);
+  return;
 }

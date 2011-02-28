@@ -214,7 +214,7 @@ void readFile(void)
   fd = open("test.tar", O_RDONLY);
   
   num_files = readTar(fileHeader, fd);
-  printFiles(fileHeader, num_files);
+  printVerbose(fileHeader, num_files);
   printf("num of files: %d\n", num_files);
 
 /*  printf("contents of header :%s\n", fileHeader->fileName);*/
