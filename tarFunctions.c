@@ -283,29 +283,20 @@ header *nextHeader (int fd, int startOfFile)
 void skipData (int fd, int skip)
 {
     char *buf;
-    int a, padding;
-
-    a = skip % BLOCK_SIZE;
-
-    printf("size of file %d\n", skip);
-    printf("size of mod result %d\n", a);
-
-    padding = BLOCK_SIZE - a;
-
-    printf("size of padding %d\n", padding);
 
     if (skip == 0)
         return;
-    if(read(fd, buf, skip) == -1)
+
+    skip += BLOCK_SIZE - (skip % BLOCK_SIZE);
+
+    printf("size of skip %d\n", skip);
+
+    if(lseek(fd, skip, SEEK_CUR) == -1)
     {
         perror("In function: skipData\nread");
         exit(EXIT_FAILURE);
     }
-    if (read(fd, buf, padding) ==  -1)
-    {
-      perror("In function: skipData\nread");
-      exit(EXIT_FAILURE);
-    }
+
     return;
 }
 
