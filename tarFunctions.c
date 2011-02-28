@@ -50,7 +50,7 @@
  *       char devMajNum[DEVNUM_SIZE];   (  8)
  *       char devMinNum[DEVNUM_SIZE];   (  8)
  *       char prefix[PREFIX_SIZE];      (155)
- *   };  
+ *   };
  *                                                                                     */
 /***************************************************************************************/
 
@@ -78,7 +78,7 @@ treeDir *newDir (header *aHeader)
         perror("malloc");
         return NULL;
     }
- 
+
     aDir->fileInfo = aHeader;
     aDir->next = NULL;
     aDir->parent = NULL;
@@ -86,7 +86,7 @@ treeDir *newDir (header *aHeader)
     aDir->level = getLevel((aDir->fileInfo)->fileName);
 
     if (aHeader->fileType == DIRTYPE)
-    	aDir->isDir = 1;
+        aDir->isDir = 1;
     else
         aDir->isDir = 0;
 
@@ -109,13 +109,13 @@ treeDir *makeTree (header *headers[])
 
     for (; headers[i] != NULL; i++)         /* Links all treeDir structures together. */
     {
-         child = newDir (headers[i]);
-         parent->next = child;
-         parent = child;
+        child = newDir (headers[i]);
+        parent->next = child;
+        parent = child;
     }
 
     parent = current = root;
-    
+
     while (current != NULL)
     {
         child = current->next;
@@ -144,7 +144,7 @@ treeDir *getParent (treeDir *parent, char *path)
 {
     int i = strlen (path);
     char parentPath[BUF_SIZE];
-    
+
     strcpy (parentPath, path);
     for (i -= 1; i > 0; i--)
     {
@@ -208,37 +208,36 @@ void createTar ()
     int errchk;
 
     /*errchk = fstat (fd,); */
-    
+
 }
 
 /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO PURPOSE YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
  * Description: Traverses a directory tree. Could be use for printing or searching.    *
-void traverse (treeDir *parent)
-{
-    if (parent != NULL)
-    {
-        while(parent != NULL)
-        {
-            if (Parent->isDir)
-               traverce (parent->child);
-            
-            parent = parent->next;
-        }
-    }
-    return;
-}*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+ void traverse (treeDir *parent)
+ {
+ if (parent != NULL)
+ {
+ while(parent != NULL)
+ {
+ if (Parent->isDir)
+ traverce (parent->child);
+
+ parent = parent->next;
+ }
+ }
+ return;
+ }*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /***************************************************************************************/
-/* Brif: Creates new header structure and returns a pointer to it.                     */
-/* Details: Given an array of 512 characters (one Block), it creates a header structure*/
-/*    and initializes every field in the structure. Returns a pointer to structure.    */
+/* Description: Given an array of 512 characters, it creates a header structure and    */
+/*    initializes every field in the structure. Returns a pointer to structure.        */
 /***************************************************************************************/
 header *newHeader(char *buf)
 {
     int i;
     header *tarHeader;
     header *pos;
-    
+
     tarHeader = malloc (sizeof (struct header));
     if (tarHeader == NULL)
     {
@@ -252,36 +251,45 @@ header *newHeader(char *buf)
     {
         pos->fileName[i] = buf[i];
     }
-    
     return tarHeader;
 }
 
 /***************************************************************************************/
-/* Description: gets a header from a tar file and moves the pointer to the next        */
-/*     header in the file.                                                             */
+/* Description: Gets a header from a tar file and returns a pointer to its header      */
+/*     structure.                                                                      */
 /***************************************************************************************/
-header *nextHeader (int fd)
+header *nextHeader (int fd, int startOfFile)
 {
-    int n, fullFile = 0;
-    int count = 0;
+    int n;
     char buf[BLOCK_SIZE];
-    char aHeader[BLOCK_SIZE];
     
-    if ((n = read(fd, aHeader, BLOCK_SIZE)) <= 0)
-        return NULL;
-
-    while (!fullFile && (n = read(fd, buf, BLOCK_SIZE)) > 0)
+    n = read(fd, buf, BLOCK_SIZE); 
+    if (n == -1)
     {
-        if (isNullBlock(buf))
-            count++;
-        else
-            count = 0;
-
-        if (count == 2)
-            fullFile = 1;
+        perror("In function: nextHeader\nread");
+        exit(EXIT_FAILURE);
     }
+    if (n == 0)
+        return NULL;
+    
+    printf("\n im here\n\n");
+    return newHeader(buf);
+}
 
-    return newHeader (aHeader);
+/***************************************************************************************/
+/* Description: moves the position of a tar file descriptor to the next header.        */
+/***************************************************************************************/
+void skipData (int fd, int skip)
+{
+    char *buf;
+    if (skip == 0)
+        return;
+    if(read(fd, buf, skip) == -1)
+    {
+        perror("In function: skipData\nread");
+        exit(EXIT_FAILURE);
+    }
+    return;
 }
 
 /***************************************************************************************/
@@ -297,7 +305,7 @@ int isNullBlock (char *block)
         if (block[i] == '\0')
             count++;
     }
-    
+
     if (count == BLOCK_SIZE)
         return 1;
     else
@@ -311,10 +319,10 @@ int charToInt (char *arr, int leng)
 {
     int num = 0;
     int i;
-
-    for (i = 0; i < leng; i++)
+    
+    for (i = 0; i < leng && arr[i] != '\0'; i++)
     {
-        num = (num * 10) + (arr[i] - '0');
+        num = ((num * 10) + (arr[i] - '0'));
     }
 
     return num;
@@ -325,16 +333,16 @@ int charToInt (char *arr, int leng)
 /***************************************************************************************/
 int readTar(header *headerArray[], int fd)
 {
-  int count = 0;
+    int count = 0;
 
-  while(1)
-  {
-    if((headerArray[count] = nextHeader(fd)) == NULL)
-      break;
-    else
-      count++;
-  }
-  return count;
+    while((headerArray[count] = nextHeader(fd, count)) != NULL)
+    {
+        skipData(fd, charToInt(headerArray[count]->fileSize, FILE_SIZE));
+        count++;
+    }
+
+    printf("count: %d \n", count);
+    return count;
 }
 
 /*>>>>>>>>>>>>>>>>>>>>>>  NEEDS REVISION <<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -344,12 +352,33 @@ int readTar(header *headerArray[], int fd)
 /***************************************************************************************/
 void printFiles (header *files[], int leng)
 {
-  int i;
+    int i;
 
-  for (i = 0; i < leng; i++)
-     printf("%s\n", files[i]->fileName);
+    for (i = 0; i < leng; i++)
+        printf("%s\n", files[i]->fileName);
 
-  return;
+    return;
+}
+
+/***************************************************************************************/
+/* Description: Given an array of headers and the number of headers in the array,      */
+/*      displays the names allong with details of the files in an array.               */
+/***************************************************************************************/
+void printVerbose (header *files[], int leng)
+{
+    int i;
+    for (i = 0; i < leng; i++)
+    {
+/*        printf("%s ", stat permisions); */
+        printf("%s/", files[i]->userName);
+        printf("%s ", files[i]->groupName);
+        printf("%8s ", files[i]->fileSize);
+/*        printf("%s ", stat date); */
+        printf("%s ", files[i]->time);
+        printf("%s\n", files[i]->fileName);
+    }
+
+    return;
 }
 
 /***************************************************************************************/
@@ -357,26 +386,26 @@ void printFiles (header *files[], int leng)
 /***************************************************************************************/
 void printHelp ()
 {
-  int fd;
-  char buf[BUF_SIZE];
-  int i;
-  int numChars;
+    int fd;
+    char buf[BUF_SIZE];
+    int i;
+    int numChars;
 
-  fd = open("HELP", O_RDONLY);
-  if(fd == -1)
-  {
-    perror("Error opening HELP file");
+    fd = open("HELP", O_RDONLY);
+    if(fd == -1)
+    {
+        perror("Error opening HELP file");
+        return;
+    }
+
+    while((numChars = read(fd, buf, BUF_SIZE)) > 0)
+    {
+        for( i = 0; i < numChars; i++)
+            printf("%c", buf[i]);
+    }
+
+    close(fd);
     return;
-  }
-
-  while((numChars = read(fd, buf, BUF_SIZE)) > 0)
-  {
-    for( i = 0; i < numChars; i++)
-      printf("%c", buf[i]);
-  }
-
-  close(fd);
-  return;
 }
 
 /***************************************************************************************/
@@ -384,25 +413,34 @@ void printHelp ()
 /***************************************************************************************/
 void printVersion ()
 {
-  int fd;
-  char buf[BUF_SIZE];
-  int i;
-  int numChars;
+    int fd;
+    char buf[BUF_SIZE];
+    int i;
+    int numChars;
 
-  fd = open("VERSION", O_RDONLY);
-  if(fd == -1)
-  {
-    perror("Error opening VERSION file");
+    fd = open("VERSION", O_RDONLY);
+    if(fd == -1)
+    {
+        perror("Error opening VERSION file");
+        return;
+    }
+
+    while((numChars = read(fd, buf, BUF_SIZE)) > 0)
+    {
+        for( i = 0; i < numChars; i++)
+            printf("%c", buf[i]);
+    }
+
+    close(fd);
     return;
-  }
-
-  while((numChars = read(fd, buf, BUF_SIZE)) > 0)
-  {
-    for( i = 0; i < numChars; i++)
-      printf("%c", buf[i]);
-  }
-
-  close(fd);
-  return;
 }
-
+/***************************************************************************************/
+/* Description: Free allocated memory.                                                 */
+/***************************************************************************************/
+void freeMem (void **arr)
+{
+    int i;
+    for (i = 0; arr[i] != NULL; i++)
+        free (arr[i]);
+    return;
+}
