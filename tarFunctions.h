@@ -73,6 +73,7 @@ header *newHeader (char *buf);
 header * nextHeader (int fd, int startOfFile);
 int isNullBlock (char *block);
 int charToInt (char *arr, int leng);
+int Oct2Dec(int oct);
 int readTar (header *headerArray[], int fd);
 void printFiles (header *files[], int leng);
 void printVerbose (header *files[], int leng);

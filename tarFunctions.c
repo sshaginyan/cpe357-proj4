@@ -61,6 +61,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <math.h>
 #include "tar.h"
 #include "tarFunctions.h"
 
@@ -193,7 +194,7 @@ treeDir *find (treeDir *parent, char *path)
                 if ((temp = find (parent->child, path)) != NULL)
                     return temp;
 
-            parent = parent->next;
+parent = parent->next;
         }
     }
     return NULL;
@@ -272,7 +273,7 @@ header *nextHeader (int fd, int startOfFile)
     if (n == 0)
         return NULL;
     
-    printf("\n im here\n\n");
+/*    printf("\n im here\n\n");*/
     return newHeader(buf);
 }
 
@@ -282,12 +283,28 @@ header *nextHeader (int fd, int startOfFile)
 void skipData (int fd, int skip)
 {
     char *buf;
+    int a, padding;
+
+    a = skip % BLOCK_SIZE;
+
+    printf("size of file %d\n", skip);
+    printf("size of mod result %d\n", a);
+
+    padding = BLOCK_SIZE - a;
+
+    printf("size of padding %d\n", padding);
+
     if (skip == 0)
         return;
     if(read(fd, buf, skip) == -1)
     {
         perror("In function: skipData\nread");
         exit(EXIT_FAILURE);
+    }
+    if (read(fd, buf, padding) ==  -1)
+    {
+      perror("In function: skipData\nread");
+      exit(EXIT_FAILURE);
     }
     return;
 }
@@ -329,19 +346,36 @@ int charToInt (char *arr, int leng)
 }
 
 /***************************************************************************************/
+/* Description: converts a number represented in ASCII characters to an intiger.       */
+/***************************************************************************************/
+int Oct2Dec(int oct)
+{
+    int n, r, s=0, i;
+    n = oct;
+    for(i = 0; n != 0; i++)
+    {
+        r = n % 10;
+        s += r * pow(8, i);
+        n = n / 10;
+    }
+    return s;
+}
+
+/***************************************************************************************/
 /* Description: Reads headers in a tar and saves fileName and fileType in an array.    */
 /***************************************************************************************/
 int readTar(header *headerArray[], int fd)
 {
     int count = 0;
 
+    printf("will read tar, count %d\n", count);
     while((headerArray[count] = nextHeader(fd, count)) != NULL)
     {
-        skipData(fd, charToInt(headerArray[count]->fileSize, FILE_SIZE));
+        skipData(fd, Oct2Dec(charToInt(headerArray[count]->fileSize, FILE_SIZE)));
         count++;
     }
 
-    printf("count: %d \n", count);
+    printf("read tar count: %d \n", count);
     return count;
 }
 
